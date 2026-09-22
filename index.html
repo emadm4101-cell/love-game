@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ruby's Rescue - Epic Love Story</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <audio id="bg-music" loop src="love_song.mp3"></audio>
+
+    <div id="game-container">
+        <!-- Canvas for the game world -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- UI Overlay -->
+        <div id="ui-layer">
+            <div class="top-bar">
+                <div class="health-container" id="health-container">
+                    <span class="heart">❤️</span>
+                    <span class="heart">❤️</span>
+                    <span class="heart">❤️</span>
+                </div>
+                <div class="letter-container" id="letter-container">
+                    <span id="collected-letters">_ _ _ _</span>
+                </div>
+                <div class="coin-container">
+                    <span class="coin-icon"></span>
+                    <span id="coin-count">0 / 20</span>
+                </div>
+            </div>
+
+            <!-- "I love you" popup container -->
+            <div id="popup-container"></div>
+
+            <!-- Guardian Dialog overlay (hidden by default) -->
+            <div id="dialog-screen" class="overlay hidden">
+                <div class="modal-content">
+                    <h1 id="dialog-speaker">Guardian</h1>
+                    <p id="dialog-text">You must pass my trial!</p>
+                    <div class="options-container" id="dialog-options">
+                        <button class="option-btn" id="btn-accept">Accept</button>
+                        <button class="option-btn" id="btn-refuse">Refuse</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trial overlay (hidden by default) -->
+            <div id="trial-screen" class="overlay hidden">
+                <div class="modal-content">
+                    <h1 id="question-text">Question</h1>
+                    <div class="options-container" id="options-container">
+                        <!-- Buttons will be injected here by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Love letter overlay (hidden by default) -->
+            <div id="love-letter" class="overlay hidden">
+                <div class="modal-content">
+                    <h1>To My Dearest Ruby 🌹</h1>
+                    <p>
+                        I crossed treacherous lands and defeated terrifying foes just to see your smile again. 
+                        Every coin I collected reminded me of the precious moments we've shared.
+                    </p>
+                    <p>
+                        You are my world, my heart, and my greatest adventure. 
+                        I love you more than words can say.
+                    </p>
+                    <p class="signature">- Your Hero</p>
+                    <button id="restart-btn">Play Again</button>
+                </div>
+            </div>
+
+            <!-- Game Over overlay (hidden by default) -->
+            <div id="game-over" class="overlay hidden">
+                <div class="modal-content">
+                    <h1>Oh no! 💔</h1>
+                    <p>Don't give up on love!</p>
+                    <button id="retry-btn">Try Again</button>
+                </div>
+            </div>
+
+            <!-- Mobile Controls -->
+            <div class="mobile-controls">
+                <div class="d-pad">
+                    <button id="btn-left" class="control-btn">◀</button>
+                    <button id="btn-down" class="control-btn">▼</button>
+                    <button id="btn-right" class="control-btn">▶</button>
+                </div>
+                <div class="action-pad">
+                    <button id="btn-jump" class="control-btn jump-btn">▲</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
