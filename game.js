@@ -40,6 +40,67 @@ window.addEventListener('keydown', unlockAudio);
 window.addEventListener('touchstart', unlockAudio);
 window.addEventListener('mousedown', unlockAudio);
 
+// Audio Context & Synth Sounds
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioContext();
+
+function playJumpSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+    
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function playKillSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.15);
+    
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.15);
+}
+
+function playWinSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const notes = [440, 554.37, 659.25, 880];
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.1);
+        
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + i * 0.1 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.1 + 0.3);
+        
+        osc.start(audioCtx.currentTime + i * 0.1);
+        osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+    });
+}
+
 // Images
 const princessHeadImg = new Image();
 princessHeadImg.src = 'princess_head.png';
@@ -129,7 +190,9 @@ function handleAnswer(selected, btn) {
     } else {
         btn.classList.add('shake');
         setTimeout(() => btn.classList.remove('shake'), 400);
-        showPopupMessage("Wtf?!", true); // Angry red text popup
+        const msgs = ["wtf", "really", "come on !!!!", "are you kidding me?", "seriously?"];
+        const msg = msgs[Math.floor(Math.random() * msgs.length)];
+        showPopupMessage(msg, true); // Angry red text popup
     }
 }
 
@@ -206,20 +269,20 @@ const TRAPPED_SPRITE = [
 
 const ENEMY_SPRITE = [
     "0000000000000000",
-    "0000000000000000",
-    "00000RRRRRR00000",
-    "0000RRRRRRRR0000",
-    "000RRRRRRRRRR000",
-    "00RRRRRRRRRRRR00",
-    "0RRRWWWWWWWWRRR0",
-    "0RRWWWWKWKWWWWR0",
-    "RRRWWWWKWKWWWWRR",
-    "RRRWWWWWWWWWWWRR",
-    "0SSSSSSSSSSSSSS0",
-    "0SSSSSSSSSSSSSS0",
-    "000CC000000CC000",
-    "00CCCC0000CCCC00",
-    "0CCCCCC00CCCCCC0",
+    "0000KKKKKK000000",
+    "000KKKKKKKK00000",
+    "00KKKSSSSKKK0000",
+    "00KKSKKSKKSK0000",
+    "00KKSSSSSSKK0000",
+    "00KKKSSSSKKK0000",
+    "00KK0RRRR0KK0000",
+    "00KKRRRRRRKK0000",
+    "00KRRRRRRRRK0000",
+    "00KRRRRRRRRK0000",
+    "000RRRRRRRR00000",
+    "000RRRRRRRR00000",
+    "0000SS00SS000000",
+    "0000KK00KK000000",
     "0000000000000000"
 ];
 
@@ -370,6 +433,7 @@ class Player {
         if (keys.jump && this.grounded) {
             this.vy = this.jumpPower;
             this.grounded = false;
+            playJumpSound();
         }
 
         this.vy += GRAVITY;
@@ -511,6 +575,7 @@ class Enemy {
             if (player.vy > 0 && player.y + player.h < this.y + this.h / 1.5) {
                 this.active = false;
                 player.vy = -12; 
+                playKillSound();
                 for (let i = 0; i < 30; i++) {
                     deathParticles.push(new DeathParticle(this.x + this.w / 2, this.y + this.h / 2));
                 }
@@ -702,8 +767,11 @@ class TrappedHero {
     update() {
         if (gameState !== 'playing') return;
         if (guardian && guardian.defeated && checkCollision(this, player)) {
-            gameState = 'win';
-            loveLetter.classList.remove('hidden');
+            if (gameState !== 'win') {
+                gameState = 'win';
+                playWinSound();
+                loveLetter.classList.remove('hidden');
+            }
         }
     }
 
@@ -960,7 +1028,6 @@ function initLevel() {
     loveLetter.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
     
-    if (gameLoopId) cancelAnimationFrame(gameLoopId);
     keys = { left: false, right: false, down: false, jump: false };
     
     // Update theme background in CSS programmatically
@@ -978,8 +1045,6 @@ function initLevel() {
         root.style.setProperty('--bg-gradient-start', '#430000');
         root.style.setProperty('--bg-gradient-end', '#000000');
     }
-
-    gameLoop();
 }
 
 function update() {
@@ -1092,3 +1157,7 @@ initLevel();
 
 restartBtn.addEventListener('click', resetGame);
 retryBtn.addEventListener('click', retryLevel);
+
+if (!gameLoopId) {
+    gameLoopId = requestAnimationFrame(gameLoop);
+}
