@@ -14,6 +14,20 @@ const questionText = document.getElementById('question-text');
 const optionsContainer = document.getElementById('options-container');
 const collectedLettersEl = document.getElementById('collected-letters');
 const bgMusic = document.getElementById('bg-music');
+const muteBtn = document.getElementById('mute-btn');
+
+if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+        if (bgMusic.paused) {
+            bgMusic.play();
+            muteBtn.innerText = '🔊';
+        } else {
+            bgMusic.pause();
+            muteBtn.innerText = '🔇';
+        }
+        muteBtn.blur();
+    });
+}
 
 // Dialog Elements
 const dialogScreen = document.getElementById('dialog-screen');
@@ -337,12 +351,64 @@ function drawSprite(ctx, sprite, x, y, scale = 4, flipX = false) {
     }
 }
 
+function drawEgyptianFlag(ctx, x, y, w, h) {
+    let stripeH = h / 3;
+    ctx.fillStyle = '#CE1126'; ctx.fillRect(x, y, w, stripeH);
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x, y + stripeH, w, stripeH);
+    ctx.fillStyle = '#000000'; ctx.fillRect(x, y + stripeH*2, w, stripeH);
+    ctx.fillStyle = '#C09300'; ctx.fillRect(x + w/2 - w/16, y + stripeH + stripeH/4, w/8, stripeH/2);
+}
+
+function drawSudaneseFlag(ctx, x, y, w, h) {
+    let stripeH = h / 3;
+    ctx.fillStyle = '#D21034'; ctx.fillRect(x, y, w, stripeH);
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x, y + stripeH, w, stripeH);
+    ctx.fillStyle = '#000000'; ctx.fillRect(x, y + stripeH*2, w, stripeH);
+    ctx.fillStyle = '#007229';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w/3, y + h/2);
+    ctx.lineTo(x, y + h);
+    ctx.fill();
+}
+
+function drawLoveFlag(ctx, x, y, w, h) {
+    let stripeH = h / 3;
+    ctx.fillStyle = '#D21034'; ctx.fillRect(x, y, w, stripeH);
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x, y + stripeH, w, stripeH);
+    ctx.fillStyle = '#000000'; ctx.fillRect(x, y + stripeH*2, w, stripeH);
+    
+    ctx.fillStyle = '#007229';
+    ctx.beginPath();
+    ctx.moveTo(x, y); ctx.lineTo(x + w/3, y + h/2); ctx.lineTo(x, y + h);
+    ctx.fill();
+    
+    ctx.fillStyle = '#ff3366';
+    ctx.font = `${h/2}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('❤', x + w/2 + w/10, y + h/2);
+    
+    ctx.fillStyle = '#C09300';
+    ctx.fillRect(x + w/2 + w/10 - w/32, y + h/2 - stripeH/4, w/16, stripeH/2);
+}
+
+function renderLoveFlagToCanvas() {
+    const lfc = document.getElementById('loveFlagCanvas');
+    if (!lfc) return;
+    const lctx = lfc.getContext('2d');
+    drawLoveFlag(lctx, 0, 0, lfc.width, lfc.height);
+}
+
 // Input Handling
 window.addEventListener('keydown', (e) => {
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
     if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
     if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = true;
-    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.jump = true;
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+        keys.jump = true;
+        if (e.code === 'Space') e.preventDefault();
+    }
 });
 
 window.addEventListener('keyup', (e) => {
@@ -770,6 +836,7 @@ class TrappedHero {
             if (gameState !== 'win') {
                 gameState = 'win';
                 playWinSound();
+                renderLoveFlagToCanvas();
                 loveLetter.classList.remove('hidden');
             }
         }
@@ -929,6 +996,10 @@ function initLevel() {
     guardian = null;
     trappedHero = null;
     
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+    
     player.x = 100;
     player.y = groundY - 64;
     player.vx = 0;
@@ -1080,6 +1151,19 @@ function update() {
 
 function drawBackground() {
     ctx.clearRect(0, 0, canvas.width / ZOOM, canvas.height / ZOOM);
+    
+    // Draw background flags
+    let flagW = 200;
+    let flagH = 133;
+    if (currentLevelIndex === 0 || currentLevelIndex === 1) {
+        drawSudaneseFlag(ctx, 400 - cameraX * 0.2, 100, flagW, flagH);
+        drawEgyptianFlag(ctx, 1200 - cameraX * 0.2, 100, flagW, flagH);
+    } else if (currentLevelIndex === 2) {
+        drawSudaneseFlag(ctx, 600 - cameraX * 0.2, 100, flagW, flagH);
+        drawEgyptianFlag(ctx, 1800 - cameraX * 0.2, 100, flagW, flagH);
+    } else if (currentLevelIndex === 3) {
+        drawLoveFlag(ctx, 1000 - cameraX * 0.2, 100, flagW*1.2, flagH*1.2);
+    }
     
     ctx.fillStyle = (currentLevelIndex === 1) ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.4)';
     bgParticles.forEach(h => {

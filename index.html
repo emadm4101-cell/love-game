@@ -29,6 +29,9 @@
                     <span class="coin-icon"></span>
                     <span id="coin-count">0 / 20</span>
                 </div>
+                <div class="mute-container">
+                    <button id="mute-btn" title="Toggle Music">🔊</button>
+                </div>
             </div>
 
             <!-- "I love you" popup container -->
@@ -59,6 +62,7 @@
             <!-- Love letter overlay (hidden by default) -->
             <div id="love-letter" class="overlay hidden">
                 <div class="modal-content">
+                    <canvas id="loveFlagCanvas" width="240" height="160" style="margin: 0 auto 20px auto; display: block; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.3);"></canvas>
                     <h1>To My Dearest Ruby 🌹</h1>
                     <p>
                         I crossed treacherous lands and defeated terrifying foes just to see your smile again. 
