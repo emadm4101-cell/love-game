@@ -511,6 +511,9 @@ class Enemy {
             if (player.vy > 0 && player.y + player.h < this.y + this.h / 1.5) {
                 this.active = false;
                 player.vy = -12; 
+                for (let i = 0; i < 30; i++) {
+                    deathParticles.push(new DeathParticle(this.x + this.w / 2, this.y + this.h / 2));
+                }
             } else {
                 player.takeDamage(1);
             }
@@ -803,11 +806,38 @@ function showPopupMessage(msg, isWarning = false, wx = null, wy = null) {
     setTimeout(() => el.remove(), 1500);
 }
 
+class DeathParticle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 15;
+        this.vy = (Math.random() - 0.5) * 15 - 5;
+        this.life = 1.0;
+        this.decay = Math.random() * 0.03 + 0.02;
+        this.color = ['#e52521', '#ffcc99', '#ffffff', '#000000'][Math.floor(Math.random() * 4)];
+        this.size = Math.random() * 8 + 4;
+    }
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += GRAVITY * 0.8;
+        this.life -= this.decay;
+    }
+    draw(ctx) {
+        if (this.life <= 0) return;
+        ctx.globalAlpha = this.life;
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+        ctx.globalAlpha = 1.0;
+    }
+}
+
 // Game Objects
 let platforms = [];
 let enemies = [];
 let coins = [];
 let letters = [];
+let deathParticles = [];
 let pipe = null;
 let guardian = null;
 let trappedHero = null;
@@ -826,6 +856,7 @@ function initLevel() {
     enemies = [];
     coins = [];
     letters = [];
+    deathParticles = [];
     pipe = null;
     guardian = null;
     trappedHero = null;
@@ -958,6 +989,8 @@ function update() {
             enemies.forEach(e => e.update());
             coins.forEach(c => c.update());
             letters.forEach(l => l.update());
+            deathParticles.forEach(dp => dp.update());
+            deathParticles = deathParticles.filter(dp => dp.life > 0);
             if (pipe) pipe.update();
             if (guardian) guardian.update();
             if (trappedHero) trappedHero.update();
@@ -1016,6 +1049,7 @@ function draw() {
     coins.forEach(c => c.draw());
     letters.forEach(l => l.draw());
     enemies.forEach(e => e.draw());
+    deathParticles.forEach(dp => dp.draw(ctx));
     if (guardian) guardian.draw();
     if (trappedHero) trappedHero.draw();
     player.draw();
