@@ -403,28 +403,33 @@
             ctx.restore();
 
             // Head
-            ctx.fillStyle = skin;
-            ctx.beginPath(); ctx.arc(0, -h/2, 12, 0, Math.PI*2); ctx.fill();
-
-            // Hair
-            ctx.fillStyle = hC;
-            ctx.beginPath(); ctx.arc(0, -h/2 - 2, 13, Math.PI, 0); ctx.fill(); // Top dome
-            if(isHero) {
-                // Ponytail
-                ctx.beginPath(); ctx.ellipse(-10, -h/2 + 5, 8, 15, Math.PI/4, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#ec4899'; ctx.fillRect(-12, -h/2, 5, 5); // Bow
+            if (isHero && typeof imgHeroLoaded !== 'undefined' && imgHeroLoaded && imgHero) {
+                // Draw the custom image at the head position
+                ctx.drawImage(imgHero, -15, -h/2 - 15, 30, 30);
             } else {
-                // Bob cut
-                ctx.fillRect(-13, -h/2, 6, 18);
-                ctx.fillRect(7, -h/2, 6, 18);
-            }
+                ctx.fillStyle = skin;
+                ctx.beginPath(); ctx.arc(0, -h/2, 12, 0, Math.PI*2); ctx.fill();
 
-            // Eye (Profile view, only one eye visible)
-            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(5, -h/2, 3, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(6, -h/2, 1.5, 0, Math.PI*2); ctx.fill();
-            if(!isHero) {
-                ctx.lineWidth = 1.5; ctx.strokeStyle = '#000';
-                ctx.beginPath(); ctx.moveTo(2, -h/2 - 3); ctx.lineTo(8, -h/2 - 1); ctx.stroke(); // Angry brow
+                // Hair
+                ctx.fillStyle = hC;
+                ctx.beginPath(); ctx.arc(0, -h/2 - 2, 13, Math.PI, 0); ctx.fill(); // Top dome
+                if(isHero) {
+                    // Ponytail
+                    ctx.beginPath(); ctx.ellipse(-10, -h/2 + 5, 8, 15, Math.PI/4, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#ec4899'; ctx.fillRect(-12, -h/2, 5, 5); // Bow
+                } else {
+                    // Bob cut
+                    ctx.fillRect(-13, -h/2, 6, 18);
+                    ctx.fillRect(7, -h/2, 6, 18);
+                }
+
+                // Eye (Profile view, only one eye visible)
+                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(5, -h/2, 3, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(6, -h/2, 1.5, 0, Math.PI*2); ctx.fill();
+                if(!isHero) {
+                    ctx.lineWidth = 1.5; ctx.strokeStyle = '#000';
+                    ctx.beginPath(); ctx.moveTo(2, -h/2 - 3); ctx.lineTo(8, -h/2 - 1); ctx.stroke(); // Angry brow
+                }
             }
 
             // Draw Front Arm
@@ -817,15 +822,20 @@
         }
 
         function drawBoss(x, y, w, h) {
-            if(imgBossLoaded) { ctx.drawImage(imgBoss, x, y, w, h); return; }
             ctx.save(); ctx.translate(x, y);
             ctx.fillStyle = '#1e293b'; ctx.fillRect(5, 15, w-10, h-15); // suit
             ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(w/2, 15); ctx.lineTo(w/2-5, 30); ctx.lineTo(w/2+5, 30); ctx.fill(); 
             ctx.fillStyle = '#dc2626'; ctx.fillRect(w/2-2, 20, 4, 15); 
-            ctx.fillStyle = '#fcd34d'; ctx.beginPath(); ctx.arc(w/2, 10, 12, 0, Math.PI*2); ctx.fill(); // head
-            ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(w/2, 6, 12, Math.PI, 0); ctx.fill();
-            ctx.fillRect(w/2-10, 5, 20, 4);
-            ctx.fillStyle = '#000'; ctx.fillRect(w/2-8, 6, 6, 4); ctx.fillRect(w/2+2, 6, 6, 4); ctx.fillRect(w/2-2, 7, 4, 1);
+            
+            if (typeof imgBossLoaded !== 'undefined' && imgBossLoaded && imgBoss) {
+                // Draw custom boss head
+                ctx.drawImage(imgBoss, w/2 - 15, -5, 30, 30);
+            } else {
+                ctx.fillStyle = '#fcd34d'; ctx.beginPath(); ctx.arc(w/2, 10, 12, 0, Math.PI*2); ctx.fill(); // head
+                ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(w/2, 6, 12, Math.PI, 0); ctx.fill();
+                ctx.fillRect(w/2-10, 5, 20, 4);
+                ctx.fillStyle = '#000'; ctx.fillRect(w/2-8, 6, 6, 4); ctx.fillRect(w/2+2, 6, 6, 4); ctx.fillRect(w/2-2, 7, 4, 1);
+            }
             ctx.restore();
         }
 
@@ -950,17 +960,8 @@
                 drawHeart(0, 0, c.w, '#fb7185'); ctx.restore();
             }
 
-            if(imgHeroLoaded) {
-                 if (player.iFrames === 0 || Math.floor(timeGlobal / 10) % 2 === 0) {
-                    ctx.save(); ctx.translate(player.x + (player.facingRight ? 0 : player.w), player.y);
-                    if (!player.facingRight) ctx.scale(-1, 1);
-                    ctx.drawImage(imgHero, 0, 0, player.w, player.h);
-                    if(player.hasGun) { ctx.fillStyle = '#a855f7'; ctx.fillRect(player.w-5, player.h/2, 15, 6); }
-                    ctx.restore();
-                 }
-            } else {
-                drawRealisticGirl(player.x, player.y, player.w, player.h, true, player.facingRight, player.vx, player.vy, player.grounded, player.iFrames, false);
-            }
+            // Player
+            drawRealisticGirl(player.x, player.y, player.w, player.h, true, player.facingRight, player.vx, player.vy, player.grounded, player.iFrames, false);
 
             for (let p of particles) {
                 ctx.fillStyle = p.color; ctx.globalAlpha = p.life;
